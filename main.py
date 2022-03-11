@@ -1,14 +1,14 @@
 import datetime
 
-from flask import Flask, render_template, redirect, make_response, request, session
+from flask import Flask, render_template, redirect, make_response, request, session, jsonify
 from flask_restful import abort
-
 from data import db_session
 from data.users import User
 from data.news import News
 from forms.user import RegisterForm, LoginForm
 from forms.news import NewsForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from data import db_session, news_api
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -18,7 +18,13 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 def main():
     db_session.global_init("db/blogs.db")
+    app.register_blueprint(news_api.blueprint)
     app.run()
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 @login_manager.user_loader
